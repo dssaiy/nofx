@@ -5,9 +5,15 @@
 # 自动完成云服务器的初始化配置和项目部署
 # Usage: curl -fsSL https://raw.githubusercontent.com/.../cloud-init.sh | bash
 #        or: bash cloud-init.sh
+#        or: NOFX_AUTO_CONFIRM=yes bash cloud-init.sh
 # ═══════════════════════════════════════════════════════════════
 
 set -e  # 遇到错误立即退出
+
+# 检测是否通过管道执行 (自动确认模式)
+if [ ! -t 0 ]; then
+    NOFX_AUTO_CONFIRM="yes"
+fi
 
 # ------------------------------------------------------------------------
 # Color Definitions
@@ -96,10 +102,14 @@ detect_os() {
 
     if [[ "$OS" != "ubuntu" && "$OS" != "debian" ]]; then
         print_warning "此脚本主要为 Ubuntu/Debian 系统设计"
-        read -p "是否继续? (y/n): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            exit 1
+        if [ "$NOFX_AUTO_CONFIRM" = "yes" ]; then
+            print_info "自动确认模式: 继续执行"
+        else
+            read -p "是否继续? (y/n): " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                exit 1
+            fi
         fi
     fi
 }
@@ -200,11 +210,16 @@ step2_install_docker() {
     if command -v docker &> /dev/null; then
         DOCKER_VERSION=$(docker --version | grep -oP '\d+\.\d+\.\d+' | head -1)
         print_warning "Docker 已安装 (版本: $DOCKER_VERSION)"
-        read -p "是否重新安装? (y/n): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            print_info "跳过 Docker 安装"
+        if [ "$NOFX_AUTO_CONFIRM" = "yes" ]; then
+            print_info "自动确认模式: 跳过 Docker 安装"
             return 0
+        else
+            read -p "是否重新安装? (y/n): " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                print_info "跳过 Docker 安装"
+                return 0
+            fi
         fi
     fi
 
@@ -261,14 +276,19 @@ step3_clone_repo() {
     # 3.2 检查目录是否已存在
     if [ -d "$INSTALL_DIR" ]; then
         print_warning "目录 $INSTALL_DIR 已存在"
-        read -p "是否删除并重新克隆? (y/n): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            print_step "删除旧目录..."
-            rm -rf "$INSTALL_DIR"
-        else
-            print_info "使用现有目录"
+        if [ "$NOFX_AUTO_CONFIRM" = "yes" ]; then
+            print_info "自动确认模式: 使用现有目录"
             return 0
+        else
+            read -p "是否删除并重新克隆? (y/n): " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                print_step "删除旧目录..."
+                rm -rf "$INSTALL_DIR"
+            else
+                print_info "使用现有目录"
+                return 0
+            fi
         fi
     fi
 
@@ -276,7 +296,7 @@ step3_clone_repo() {
     print_step "克隆 NOFX 仓库..."
 
     # 获取仓库 URL (默认或从环境变量)
-    REPO_URL=${NOFX_REPO_URL:-"https://github.com/tinkle-community/nofx.git"}
+    REPO_URL=${NOFX_REPO_URL:-"https://github.com/dssaiy/nofx.git"}
     REPO_BRANCH=${NOFX_REPO_BRANCH:-"dev"}
 
     print_info "仓库地址: $REPO_URL"
@@ -408,6 +428,13 @@ step5_start_services() {
     print_info "  cd $INSTALL_DIR"
     print_info "  ./start.sh start --build"
     echo ""
+
+    if [ "$NOFX_AUTO_CONFIRM" = "yes" ]; then
+        print_info "自动确认模式: 跳过服务启动"
+        print_info "请稍后手动启动服务"
+        return 0
+    fi
+
     read -p "现在启动服务? (y/n): " -n 1 -r
     echo
 
@@ -531,15 +558,19 @@ main() {
     print_info "  创建用户: ${NOFX_USER:-跳过}"
     print_info "  前端端口: ${NOFX_FRONTEND_PORT:-3000}"
     print_info "  后端端口: ${NOFX_BACKEND_PORT:-8080}"
-    print_info "  仓库地址: ${NOFX_REPO_URL:-https://github.com/tinkle-community/nofx.git}"
+    print_info "  仓库地址: ${NOFX_REPO_URL:-https://github.com/dssaiy/nofx.git}"
     print_info "  仓库分支: ${NOFX_REPO_BRANCH:-dev}"
     echo ""
 
-    read -p "开始初始化? (y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        print_warning "已取消初始化"
-        exit 0
+    if [ "$NOFX_AUTO_CONFIRM" = "yes" ]; then
+        print_info "自动确认模式: 开始初始化"
+    else
+        read -p "开始初始化? (y/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_warning "已取消初始化"
+            exit 0
+        fi
     fi
 
     # 记录开始时间

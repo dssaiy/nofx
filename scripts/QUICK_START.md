@@ -7,7 +7,7 @@
 登录您的云服务器,执行以下**单行命令**:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tinkle-community/nofx/dev/scripts/cloud-init.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/dssaiy/nofx/dev/scripts/cloud-init.sh | sudo bash
 ```
 
 **就这么简单!** 🎉
@@ -21,7 +21,7 @@ curl -fsSL https://raw.githubusercontent.com/tinkle-community/nofx/dev/scripts/c
 #### 步骤 1: 上传脚本到服务器
 ```bash
 # 在本地下载脚本
-wget https://raw.githubusercontent.com/tinkle-community/nofx/dev/scripts/cloud-init.sh
+wget https://raw.githubusercontent.com/dssaiy/nofx/dev/scripts/cloud-init.sh
 
 # 或使用 scp 上传
 scp cloud-init.sh root@your_server_ip:/root/
@@ -52,7 +52,7 @@ export NOFX_BACKEND_PORT="8080"           # API端口
 export NOFX_REPO_BRANCH="dev"             # 仓库分支
 
 # 执行脚本
-curl -fsSL https://raw.githubusercontent.com/tinkle-community/nofx/dev/scripts/cloud-init.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/dssaiy/nofx/dev/scripts/cloud-init.sh | sudo bash
 ```
 
 **可选配置环境变量:**
@@ -63,7 +63,7 @@ curl -fsSL https://raw.githubusercontent.com/tinkle-community/nofx/dev/scripts/c
 | `NOFX_PASSWORD` | 用户密码 | 空 |
 | `NOFX_FRONTEND_PORT` | Web界面端口 | 3000 |
 | `NOFX_BACKEND_PORT` | API端口 | 8080 |
-| `NOFX_REPO_URL` | 仓库地址 | https://github.com/tinkle-community/nofx.git |
+| `NOFX_REPO_URL` | 仓库地址 | https://github.com/dssaiy/nofx.git |
 | `NOFX_REPO_BRANCH` | 仓库分支 | dev |
 
 ---
@@ -308,7 +308,7 @@ sudo apt-get remove docker docker-engine docker.io containerd runc
 
 ```bash
 # 一键部署
-curl -fsSL https://raw.githubusercontent.com/tinkle-community/nofx/dev/scripts/cloud-init.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/dssaiy/nofx/dev/scripts/cloud-init.sh | sudo bash
 
 # 启动服务
 cd /root/nofx && ./start.sh start --build
